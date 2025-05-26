@@ -6,12 +6,12 @@ import numpy as np
 IMAGE_PATH = 'takeoff.jpg'  # <-- change to your file
 
 # Real-world board dimensions (in centimeters)
-BOARD_WIDTH_CM  = 20.0  # across runway (x-axis)
-BOARD_LENGTH_CM =  122.0  # from foul line back into runway (y-axis)
+BOARD_WIDTH_CM  = 122.0  # across runway (x-axis)
+BOARD_LENGTH_CM =  20.0  # from foul line back into runway (y-axis)
 
 # Warp size: one pixel == 1 cm
-WARP_WIDTH_PX  = int(BOARD_WIDTH_CM)
-WARP_HEIGHT_PX = int(BOARD_LENGTH_CM)
+WARP_WIDTH_PX  = int(BOARD_LENGTH_CM)
+WARP_HEIGHT_PX = int(BOARD_WIDTH_CM)
 
 # Storage for points
 board_pts = []  # click any 4 corners of the board (order does not matter)
