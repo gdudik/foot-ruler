@@ -90,12 +90,17 @@ left_mid_warp = np.array([[[0.0, WARP_HEIGHT_PX / 2.0]]], dtype='float32')
 left_mid_src = cv2.perspectiveTransform(left_mid_warp, H_inv)[0][0]
 left_mid_pt = tuple(left_mid_src.astype(int))
 
+# Compute intersection point on left edge at same y-coordinate as toe
+left_edge_warp = np.array([[[0.0, toe_warp[1]]]], dtype='float32')  # Same y as toe, x=0
+left_edge_src = cv2.perspectiveTransform(left_edge_warp, H_inv)[0][0]
+left_edge_pt = tuple(left_edge_src.astype(int))
+
 # Draw overlay and annotate
 out = orig.copy()
-cv2.line(out, toe_pt, left_mid_pt, (255,0,0), 2)
+cv2.line(out, toe_pt, left_edge_pt, (0,4,119), 2)
 label = f"{distance_cm:.1f} cm"
-mid = ((toe_pt[0]+left_mid_pt[0])//2, (toe_pt[1]+left_mid_pt[1])//2)
-cv2.putText(out, label, mid, cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+mid = ((toe_pt[0]+left_edge_pt[0])//2, (toe_pt[1]+left_edge_pt[1])//2)
+cv2.putText(out, label, mid, cv2.FONT_HERSHEY_SIMPLEX, 1, (0,4,119), 2)
 
 # Save result and skip displaying
 cv2.imwrite('annotated_jump.jpg', out)
