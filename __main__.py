@@ -117,28 +117,56 @@ right_hash_start, right_hash_end = get_hash_points(toe_pt)
 cv2.line(out, left_hash_start, left_hash_end, (0,4,119), 2)
 cv2.line(out, right_hash_start, right_hash_end, (0,4,119), 2)
 
-# Calculate midpoint for label (existing code)
-label = f"{distance_cm:.1f} cm"
-mid = ((toe_pt[0]+left_edge_pt[0])//2, (toe_pt[1]+left_edge_pt[1])//2)
+# Calculate measurements and format labels
+cm_label = f"{distance_cm:.1f} cm"
+inches = distance_cm / 2.54  # Convert cm to inches
+quarter = round(inches * 4) / 4  # Round to nearest quarter inch
+inch_label = f"{quarter:.2f}\""  # Format as decimal with 2 places
+
+# Combined label with newline
+label = f"{cm_label}\n{inch_label}"
+
+# Calculate midpoint for label with more offset for two lines
+offset_y = 30  # Increased offset for two lines of text
+mid_x = (toe_pt[0] + left_edge_pt[0]) // 2
+mid_y = (toe_pt[1] + left_edge_pt[1]) // 2 + offset_y
+mid = (mid_x, mid_y)
 
 # Convert from OpenCV to PIL format
 out_rgb = cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
 pil_img = Image.fromarray(out_rgb)
 draw = ImageDraw.Draw(pil_img)
 
-# Load a font (use a system font or provide path to a .ttf file)
+# Load font
 font_size = 36
 try:
-    # Try to use Arial font (common on Mac)
     font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", font_size)
 except OSError:
-    # Fallback to default font
     font = ImageFont.load_default()
 
-# Add text with PIL
-draw.text(mid, label, font=font, fill=(119,4,0))  # Note: PIL uses RGB
+# Get text size to create background card (now for multiline text)
+text_bbox = draw.textbbox(mid, label, font=font)
+padding = 8  # pixels of padding around text
+card_bbox = (
+    text_bbox[0] - padding,
+    text_bbox[1] - padding,
+    text_bbox[2] + padding,
+    text_bbox[3] + padding
+)
 
-# Convert back to OpenCV format
+# Draw white background card with slight transparency
+card_color = (255, 255, 255, 230)  # White with alpha
+card_layer = Image.new('RGBA', pil_img.size, (0, 0, 0, 0))
+card_draw = ImageDraw.Draw(card_layer)
+card_draw.rectangle(card_bbox, fill=card_color)
+pil_img = Image.alpha_composite(pil_img.convert('RGBA'), card_layer)
+
+# Draw text on top
+draw = ImageDraw.Draw(pil_img)
+draw.text(mid, label, font=font, fill=(119, 4, 0))  # Note: PIL uses RGB
+
+# Convert back to OpenCV format (convert from RGBA to RGB first)
+pil_img = pil_img.convert('RGB')
 out = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
 
 # Save result
