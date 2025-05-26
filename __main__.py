@@ -1,4 +1,5 @@
 import cv2
+from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
 # === USER SETUP ===
@@ -97,11 +98,49 @@ left_edge_pt = tuple(left_edge_src.astype(int))
 
 # Draw overlay and annotate
 out = orig.copy()
-cv2.line(out, toe_pt, left_edge_pt, (0,4,119), 2)
+cv2.line(out, toe_pt, left_edge_pt, (0,4,119), 2)  # Main horizontal line
+
+# Add vertical hash marks at each end
+hash_length = 30  # Length of hash marks in pixels
+
+# Calculate points for truly vertical hash marks
+def get_hash_points(point):
+    x, y = point
+    return (
+        (x, y - hash_length//2),  # Start point (up)
+        (x, y + hash_length//2)   # End point (down)
+    )
+
+# Draw hash marks
+left_hash_start, left_hash_end = get_hash_points(left_edge_pt)
+right_hash_start, right_hash_end = get_hash_points(toe_pt)
+cv2.line(out, left_hash_start, left_hash_end, (0,4,119), 2)
+cv2.line(out, right_hash_start, right_hash_end, (0,4,119), 2)
+
+# Calculate midpoint for label (existing code)
 label = f"{distance_cm:.1f} cm"
 mid = ((toe_pt[0]+left_edge_pt[0])//2, (toe_pt[1]+left_edge_pt[1])//2)
-cv2.putText(out, label, mid, cv2.FONT_HERSHEY_SIMPLEX, 1, (0,4,119), 2)
 
-# Save result and skip displaying
+# Convert from OpenCV to PIL format
+out_rgb = cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
+pil_img = Image.fromarray(out_rgb)
+draw = ImageDraw.Draw(pil_img)
+
+# Load a font (use a system font or provide path to a .ttf file)
+font_size = 36
+try:
+    # Try to use Arial font (common on Mac)
+    font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", font_size)
+except OSError:
+    # Fallback to default font
+    font = ImageFont.load_default()
+
+# Add text with PIL
+draw.text(mid, label, font=font, fill=(119,4,0))  # Note: PIL uses RGB
+
+# Convert back to OpenCV format
+out = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+
+# Save result
 cv2.imwrite('annotated_jump.jpg', out)
 print("Saved annotated_jump.jpg")
