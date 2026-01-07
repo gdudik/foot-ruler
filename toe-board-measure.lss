@@ -1,0 +1,16 @@
+;this script uses the Verilynx image export module to create an image suitable for 
+;the measurement tool included in this repository. It exports the correct board 
+;number in the file name and also ensures that the image is exported at 100%
+;so that it is not artificially cropped by the visible window in Verilynx. 
+
+;;Results
+\14\0a%s\L0\X0\=1\S1\R0\B0
+\14\08%1.1s\L0\X0\=2\S2\R0\B0
+\14\14%s\L1\X1\S3\R0\B0
+\14\00\He1\He2\13Command=ImageExport;Area=0%,0%,100%,100%;Window=\X1\U5\O3;File=
+\13\04\He1\He2%s-
+\13\05\He1\He2%s-
+\13\06\He1\He2%s_
+\14\03\He1\He2%s_
+\14\0a\He1\He2%s_Board-\X1\U5\O3
+\14\00\He1\He2;\0d\0a
