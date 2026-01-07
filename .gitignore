@@ -1,2 +1,5 @@
 venv/
 .DS_Store
+Jumps Shoes.v2i.yolov8/
+runs/
+*.jpg
