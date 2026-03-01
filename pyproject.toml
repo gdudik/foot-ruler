@@ -1,0 +1,29 @@
+[project]
+name = "foot-ruler"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+    "numpy (>=2.4.2,<3.0.0)",
+    "opencv-contrib-python (>=4.13.0.92,<5.0.0.0)",
+    "opencv-python (>=4.13.0.92,<5.0.0.0)",
+    "pillow (>=12.1.1,<13.0.0)",
+    "argparse (>=1.4.0,<2.0.0)",
+    "torch (>=2.10.0,<3.0.0)",
+    "torchvision (>=0.25.0,<0.26.0)",
+    "segmentation-models-pytorch (>=0.5.0,<0.6.0)",
+    "albumentations (>=2.0.8,<3.0.0)",
+    "tqdm (>=4.67.3,<5.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false

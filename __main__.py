@@ -1,7 +1,10 @@
 import cv2
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
-from ultralytics import YOLO
+import torch
+import segmentation_models_pytorch as smp
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 import argparse
 import os
 import json
@@ -59,40 +62,73 @@ if len(board_pts) != 4:
 
 print(f"Loaded board {BOARD_NUMBER} coordinates from {COORDS_FILE}")
 
-# Load YOLO segmentation model for shoe detection
-model = YOLO('best.pt')
+# ---- Load PyTorch segmentation model for shoe detection ----
+DEVICE = (
+    "mps" if torch.backends.mps.is_available()
+    else "cuda" if torch.cuda.is_available()
+    else "cpu"
+)
 
-# Run YOLO inference to detect the shoe silhouette
-print("Detecting shoe silhouette...")
-results = model(orig)
+ckpt = torch.load("best_pytorch.pt", map_location=DEVICE)
+IMG_SIZE = int(ckpt.get("img_size", 512))
+THRESH = float(ckpt.get("threshold", 0.5))
+ENCODER = ckpt.get("encoder", "efficientnet-b0")
 
-# Check if any shoes were detected
-if len(results[0].masks) > 0:
-    # Get the mask from the highest confidence detection
-    mask = results[0].masks.data[0].cpu().numpy()
-    
-    # Resize mask to match original image dimensions
-    mask_resized = cv2.resize(mask, (orig.shape[1], orig.shape[0]), interpolation=cv2.INTER_NEAREST)
-    
-    # Find coordinates of all points in the mask
-    y_coords, x_coords = np.where(mask_resized > 0)
-    
-    if len(x_coords) == 0:
-        raise RuntimeError("No valid mask pixels found.")
-    
-    # Find the extreme point based on orientation
-    if ORIENTATION == 'left':
-        # For left orientation, find the leftmost point (minimum x)
-        idx = np.argmin(x_coords)
-        toe_pt = (int(x_coords[idx]), int(y_coords[idx]))
-    else:
-        # For right orientation, find the rightmost point (maximum x)
-        idx = np.argmax(x_coords)
-        toe_pt = (int(x_coords[idx]), int(y_coords[idx]))
-    
-    print(f"Toe tip detected at coordinates: {toe_pt}")
-else:
+model = smp.Unet(
+    encoder_name=ENCODER,
+    encoder_weights=None,
+    in_channels=3,
+    classes=1,
+    activation=None
+).to(DEVICE)
+
+model.load_state_dict(ckpt["state_dict"], strict=True)
+model.eval()
+
+infer_tf = A.Compose([
+    A.Resize(IMG_SIZE, IMG_SIZE),
+    A.Normalize(),
+    ToTensorV2(),
+])
+
+print("Detecting shoe silhouette (PyTorch)...")
+
+rgb = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)
+x = infer_tf(image=rgb)["image"].unsqueeze(0).to(DEVICE)
+
+with torch.no_grad():
+    logits = model(x)  # [1,1,h,w]
+    prob = torch.sigmoid(logits)[0, 0].cpu().numpy()
+
+mask_small = (prob > THRESH).astype(np.uint8)  # {0,1}
+
+mask_resized = cv2.resize(
+    mask_small,
+    (orig.shape[1], orig.shape[0]),
+    interpolation=cv2.INTER_NEAREST
+)
+
+# Keep only the biggest blob (helps prevent tiny false positives)
+num, labels, stats, _ = cv2.connectedComponentsWithStats(mask_resized, connectivity=8)
+if num <= 1:
     raise RuntimeError("No shoe detected in the image. Cannot proceed with measurement.")
+largest = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
+mask_resized = (labels == largest).astype(np.uint8)
+
+# Find coordinates of all points in the mask
+y_coords, x_coords = np.where(mask_resized > 0)
+if len(x_coords) == 0:
+    raise RuntimeError("No valid mask pixels found.")
+
+# Find the extreme point based on orientation
+if ORIENTATION == 'left':
+    idx = np.argmin(x_coords)
+    toe_pt = (int(x_coords[idx]), int(y_coords[idx]))
+else:
+    idx = np.argmax(x_coords)
+    toe_pt = (int(x_coords[idx]), int(y_coords[idx]))
+
+print(f"Toe tip detected at coordinates: {toe_pt}")
 
 # === SORT CORNER POINTS AUTOMATICALLY ===
 pts = np.array(board_pts, dtype='float32')
