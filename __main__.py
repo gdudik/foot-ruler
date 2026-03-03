@@ -4,6 +4,7 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import argparse
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--path', '-p', required=True, help='where are the feet pics')
@@ -29,7 +30,8 @@ class NewFileHandler(FileSystemEventHandler):
 
         # ---- build command ----
         cmd = [
-            "poetry run python measure.py",
+            sys.executable,
+            "measure.py",
             "--image", str(file_path),
             "--board", board_num,
             "--path", args.output
