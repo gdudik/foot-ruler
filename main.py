@@ -12,12 +12,14 @@ import json
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Measure toe distance from board edge')
-parser.add_argument('--image', '-i', default='default.jpg',
+parser.add_argument('--image', '-i', required=True,
                    help='Path to the image file to process')
 parser.add_argument('--coords', '-c', default='board_coords.json',
                    help='Path to the board coordinates JSON file')
 parser.add_argument('--board', '-b', type=int, default=1,
                    help='Board number to use for measurement (default: 1)')
+parser.add_argument('--path', '-p', default='/',
+                    help='Path for image export')
 args = parser.parse_args()
 
 
@@ -231,7 +233,8 @@ label = f"{cm_label} / {inch_label}"
 
 # Generate output filename by adding "_annotated" before the extension
 base_name, extension = os.path.splitext(IMAGE_PATH)
-output_filename = f"{base_name}_annotated{extension}"
+output_filename = os.path.join(args.path, f"{base_name}{extension}")
+
 
 # Save result
 cv2.imwrite(output_filename, out)
