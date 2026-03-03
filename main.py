@@ -12,8 +12,6 @@ import json
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Measure toe distance from board edge')
-parser.add_argument('--orientation', '-o', choices=['left', 'right'], default='left',
-                   help='Orientation for measurement: left measures from left edge, right measures from right edge')
 parser.add_argument('--image', '-i', default='default.jpg',
                    help='Path to the image file to process')
 parser.add_argument('--coords', '-c', default='board_coords.json',
@@ -27,7 +25,7 @@ args = parser.parse_args()
 # === USER SETUP ===
 # Path to your takeoff board image and coordinates file
 IMAGE_PATH = args.image
-ORIENTATION = args.orientation
+
 COORDS_FILE = args.coords
 BOARD_NUMBER = args.board
 
@@ -43,6 +41,8 @@ if board_key not in board_data:
 
 board_pts = board_data[board_key]["coords"]
 board_depth = board_data[board_key]["depth"]
+orientation = board_data[board_key]["orientation"]
+
 
 # Real-world board dimensions (in centimeters)
 BOARD_WIDTH_CM  = 122.0  # across runway (y-axis)
@@ -132,7 +132,7 @@ if len(x_coords) == 0:
     raise RuntimeError("No valid mask pixels found.")
 
 # Find the extreme point based on orientation
-if ORIENTATION == 'left':
+if orientation == 'left':
     idx = np.argmin(x_coords)
     toe_pt = (int(x_coords[idx]), int(y_coords[idx]))
 else:
@@ -169,7 +169,7 @@ toe_src = np.array([[toe_pt]], dtype='float32')
 toe_warp = cv2.perspectiveTransform(toe_src, H)[0][0]
 
 # Distance calculation based on orientation
-if ORIENTATION == 'left':
+if orientation == 'left':
     # Measure from left edge (x=0)
     distance_cm = toe_warp[0]
     edge_x = 0.0

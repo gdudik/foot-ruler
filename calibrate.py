@@ -8,7 +8,7 @@ import argparse
 # File to save coordinates
 COORDS_FILE = 'board_coords.json'
 
-def save_coordinates(coords, board_number, depth, file_path=COORDS_FILE):
+def save_coordinates(coords, board_number, depth, orientation, file_path=COORDS_FILE):
     """Save coordinates to a JSON file with support for multiple boards"""
     # Load existing data if file exists
     board_data = {}
@@ -24,7 +24,8 @@ def save_coordinates(coords, board_number, depth, file_path=COORDS_FILE):
     # Add/update the current board's coordinates
     board_data[str(board_number)] = {
         "coords": coords,
-        "depth": depth
+        "depth": depth,
+        "orientation": orientation
     }
     
     # Save updated data
@@ -34,7 +35,7 @@ def save_coordinates(coords, board_number, depth, file_path=COORDS_FILE):
 
 def on_mouse(event, x, y, flags, params):
     """Mouse callback for selecting board corners"""
-    img, coords, board_number, depth = params
+    img, coords, board_number, depth, orientation = params
     display_img = img.copy()
     
     # Show all existing points
@@ -54,7 +55,7 @@ def on_mouse(event, x, y, flags, params):
         # If we have all 4 points, save and close window automatically
         if len(coords) == 4:
             print("All 4 corners selected!")
-            save_coordinates(coords, board_number, depth)
+            save_coordinates(coords, board_number, depth, orientation)
             # Signal window to close
             cv2.destroyWindow("Calibrate - Select 4 Board Corners")
             
@@ -72,6 +73,7 @@ def main():
                        help='Board number to calibrate, must be 1 or greater (required)')
     parser.add_argument('--depth', '-d', type=int, default=20, 
                         help='Depth of takeoff board in cm. Defaults to 20. Required for taped takeoff boards.')
+    parser.add_argument('--orientation', '-o',choices=['left', 'right'], required=True)
     args = parser.parse_args()
     
     # Validate board number
@@ -82,6 +84,7 @@ def main():
     image_path = args.image
     board_number = args.board
     depth = args.depth
+    orientation = args.orientation
     
     print(f"Calibrating board {board_number}...")
     
@@ -108,7 +111,7 @@ def main():
     cv2.waitKey(1)
     
     # Set mouse callback
-    cv2.setMouseCallback("Calibrate - Select 4 Board Corners", on_mouse, [img, coords, board_number, depth])
+    cv2.setMouseCallback("Calibrate - Select 4 Board Corners", on_mouse, [img, coords, board_number, depth, orientation])
     
     print("Click on the 4 corners of the takeoff board.")
     print("The order doesn't matter - they'll be sorted automatically later.")
