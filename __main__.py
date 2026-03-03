@@ -3,8 +3,15 @@ import subprocess
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+import argparse
 
-WATCH_FOLDER = "/path/to/watch"
+parser = argparse.ArgumentParser()
+parser.add_argument('--path', '-p', required=True, help='where are the feet pics')
+parser.add_argument('--output', '-o', required=True, help="where do we put them when we're done looking at them")
+args = parser.parse_args()
+
+
+WATCH_FOLDER = args.path
 
 class NewFileHandler(FileSystemEventHandler):
 
@@ -12,30 +19,20 @@ class NewFileHandler(FileSystemEventHandler):
         # ignore directories
         if event.is_directory:
             return
-
+        time.sleep(1)
         file_path = Path(event.src_path)
         filename = file_path.name
 
         print(f"New file detected: {filename}")
-
-        # ---- extract data from filename ----
-        # example: meet_123_event_45.txt
-        parts = filename.split("_")
-
-        try:
-            meet_id = parts[1]
-            event_id = parts[3].split(".")[0]
-        except Exception:
-            print("Filename format not recognized")
-            return
+        
+        board_num = filename[0:1]
 
         # ---- build command ----
         cmd = [
-            "python",
-            "process_file.py",
-            "--meet", meet_id,
-            "--event", event_id,
-            "--file", str(file_path)
+            "poetry run python main.py",
+            "--image", file_path,
+            "--board", board_num,
+            "--path", args.output
         ]
 
         print("Running:", " ".join(cmd))
