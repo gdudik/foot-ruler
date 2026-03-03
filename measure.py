@@ -18,7 +18,7 @@ parser.add_argument('--coords', '-c', default='board_coords.json',
                    help='Path to the board coordinates JSON file')
 parser.add_argument('--board', '-b', type=int, default=1,
                    help='Board number to use for measurement (default: 1)')
-parser.add_argument('--path', '-p', default='/',
+parser.add_argument('--path', '-p', default='.',
                     help='Path for image export')
 args = parser.parse_args()
 
@@ -239,7 +239,7 @@ output_filename = os.path.join(args.path, f"{base_name}{extension}")
 # Save result
 cv2.imwrite(output_filename, out)
 print(f"Saved {output_filename}")
-
+time.sleep(0.5)
 base = Image.open(output_filename).convert("RGBA")
 overlay = Image.open("bar.png").convert("RGBA")
 pos_x = (base.width - overlay.width) // 2
