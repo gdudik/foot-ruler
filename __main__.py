@@ -22,29 +22,14 @@ parser.add_argument('--board', '-b', type=int, default=1,
                    help='Board number to use for measurement (default: 1)')
 args = parser.parse_args()
 
+
+
 # === USER SETUP ===
 # Path to your takeoff board image and coordinates file
 IMAGE_PATH = args.image
 ORIENTATION = args.orientation
 COORDS_FILE = args.coords
 BOARD_NUMBER = args.board
-
-# Real-world board dimensions (in centimeters)
-BOARD_WIDTH_CM  = 122.0  # across runway (x-axis)
-BOARD_LENGTH_CM =  20.0  # from foul line back into runway (y-axis)
-
-# Warp size: one pixel == 1 cm
-WARP_WIDTH_PX  = int(BOARD_LENGTH_CM)
-WARP_HEIGHT_PX = int(BOARD_WIDTH_CM)
-
-# Load image
-orig = cv2.imread(IMAGE_PATH)
-if orig is None:
-    raise FileNotFoundError(f"Could not load image at '{IMAGE_PATH}'")
-
-# Check if board coordinates file exists
-if not os.path.exists(COORDS_FILE):
-    raise FileNotFoundError(f"Calibration file '{COORDS_FILE}' not found. Please run 'python calibrate.py -i {IMAGE_PATH} -b {BOARD_NUMBER}' first.")
 
 # Load board corner coordinates
 with open(COORDS_FILE, 'r') as f:
@@ -56,7 +41,32 @@ if board_key not in board_data:
     available_boards = ', '.join(sorted(board_data.keys()))
     raise ValueError(f"Board {BOARD_NUMBER} not found in {COORDS_FILE}. Available boards: {available_boards}. Please run 'python calibrate.py -i {IMAGE_PATH} -b {BOARD_NUMBER}' to calibrate this board.")
 
-board_pts = board_data[board_key]
+board_pts = board_data[board_key]["coords"]
+board_depth = board_data[board_key]["depth"]
+
+# Real-world board dimensions (in centimeters)
+BOARD_WIDTH_CM  = 122.0  # across runway (y-axis)
+
+# Warp size: one pixel == 1 cm
+WARP_WIDTH_PX  = int(board_depth)
+WARP_HEIGHT_PX = int(BOARD_WIDTH_CM)
+
+
+
+# Load image
+orig = cv2.imread(IMAGE_PATH)
+if orig is None:
+    raise FileNotFoundError(f"Could not load image at '{IMAGE_PATH}'")
+
+# Check if board coordinates file exists
+if not os.path.exists(COORDS_FILE):
+    raise FileNotFoundError(f"Calibration file '{COORDS_FILE}' not found. Please run 'python calibrate.py -i {IMAGE_PATH} -b {BOARD_NUMBER}' first.")
+
+
+
+
+
+
 
 if len(board_pts) != 4:
     raise ValueError(f"Invalid board coordinates for board {BOARD_NUMBER} in {COORDS_FILE}. Expected 4 points, got {len(board_pts)}.")

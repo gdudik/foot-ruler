@@ -8,7 +8,7 @@ import argparse
 # File to save coordinates
 COORDS_FILE = 'board_coords.json'
 
-def save_coordinates(coords, board_number, file_path=COORDS_FILE):
+def save_coordinates(coords, board_number, depth, file_path=COORDS_FILE):
     """Save coordinates to a JSON file with support for multiple boards"""
     # Load existing data if file exists
     board_data = {}
@@ -16,21 +16,16 @@ def save_coordinates(coords, board_number, file_path=COORDS_FILE):
         try:
             with open(file_path, 'r') as f:
                 existing_data = json.load(f)
-                # Handle backward compatibility - convert old format to new format
-                if isinstance(existing_data, list) and len(existing_data) == 4:
-                    # Old format: [[x1,y1], [x2,y2], [x3,y3], [x4,y4]]
-                    # Convert to new format and assume it was board 1
-                    board_data = {"1": existing_data}
-                    print("Converted old format coordinates to new multi-board format")
-                elif isinstance(existing_data, dict):
-                    # New format: {"1": [[x1,y1], ...], "2": [[x1,y1], ...]}
-                    board_data = existing_data
+                board_data = existing_data
         except (json.JSONDecodeError, KeyError):
             print("Warning: Could not read existing coordinates file, starting fresh")
             board_data = {}
     
     # Add/update the current board's coordinates
-    board_data[str(board_number)] = coords
+    board_data[str(board_number)] = {
+        "coords": coords,
+        "depth": depth
+    }
     
     # Save updated data
     with open(file_path, 'w') as f:
@@ -39,7 +34,7 @@ def save_coordinates(coords, board_number, file_path=COORDS_FILE):
 
 def on_mouse(event, x, y, flags, params):
     """Mouse callback for selecting board corners"""
-    img, coords, board_number = params
+    img, coords, board_number, depth = params
     display_img = img.copy()
     
     # Show all existing points
@@ -59,7 +54,7 @@ def on_mouse(event, x, y, flags, params):
         # If we have all 4 points, save and close window automatically
         if len(coords) == 4:
             print("All 4 corners selected!")
-            save_coordinates(coords, board_number)
+            save_coordinates(coords, board_number, depth)
             # Signal window to close
             cv2.destroyWindow("Calibrate - Select 4 Board Corners")
             
@@ -69,12 +64,14 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         description='Calibrate board coordinates by selecting corners',
-        epilog='Example: python calibrate.py -i jump_image.jpg -b 1'
+        epilog='Example: python calibrate.py -i jump_image.jpg -b 1 -d 18'
     )
     parser.add_argument('--image', '-i', required=True,
                        help='Path to the image file to calibrate (required)')
     parser.add_argument('--board', '-b', type=int, required=True,
                        help='Board number to calibrate, must be 1 or greater (required)')
+    parser.add_argument('--depth', '-d', type=int, default=20, 
+                        help='Depth of takeoff board in cm. Defaults to 20. Required for taped takeoff boards.')
     args = parser.parse_args()
     
     # Validate board number
@@ -84,6 +81,7 @@ def main():
     
     image_path = args.image
     board_number = args.board
+    depth = args.depth
     
     print(f"Calibrating board {board_number}...")
     
@@ -110,7 +108,7 @@ def main():
     cv2.waitKey(1)
     
     # Set mouse callback
-    cv2.setMouseCallback("Calibrate - Select 4 Board Corners", on_mouse, [img, coords, board_number])
+    cv2.setMouseCallback("Calibrate - Select 4 Board Corners", on_mouse, [img, coords, board_number, depth])
     
     print("Click on the 4 corners of the takeoff board.")
     print("The order doesn't matter - they'll be sorted automatically later.")
