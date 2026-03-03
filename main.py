@@ -232,7 +232,7 @@ inch_label = f"{quarter:.2f}\""  # Format as decimal with 2 places
 label = f"{cm_label} / {inch_label}"
 
 # Generate output filename by adding "_annotated" before the extension
-base_name, extension = os.path.splitext(IMAGE_PATH)
+base_name, extension = os.path.splitext(os.path.basename(IMAGE_PATH))
 output_filename = os.path.join(args.path, f"{base_name}{extension}")
 
 
