@@ -239,7 +239,7 @@ output_filename = os.path.join(args.path, f"{base_name}{extension}")
 # Save result
 cv2.imwrite(output_filename, out)
 print(f"Saved {output_filename}")
-time.sleep(0.5)
+
 base = Image.open(output_filename).convert("RGBA")
 overlay = Image.open("bar.png").convert("RGBA")
 pos_x = (base.width - overlay.width) // 2
