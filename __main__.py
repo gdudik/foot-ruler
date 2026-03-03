@@ -29,8 +29,8 @@ class NewFileHandler(FileSystemEventHandler):
 
         # ---- build command ----
         cmd = [
-            "poetry run python main.py",
-            "--image", file_path,
+            "poetry run python measure.py",
+            "--image", str(file_path),
             "--board", board_num,
             "--path", args.output
         ]
