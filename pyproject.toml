@@ -17,7 +17,7 @@ dependencies = [
     "albumentations (>=2.0.8,<3.0.0)",
     "tqdm (>=4.67.3,<5.0.0)",
     "opencv-contrib-python (>=4.13.0.92,<5.0.0.0)",
-    "watchdog (>=6.0.0,<7.0.0)"
+    "watchdog (>=6.0.0,<7.0.0)",
 ]
 
 
@@ -26,4 +26,9 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-package-mode = false
+packages = [{ include = "*.*" }]
+
+[tool.poetry.scripts]
+calibrate = "calibrate:main"
+measure = "measure:main"
+start = "watcher:main"

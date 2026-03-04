@@ -65,7 +65,7 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         description='Calibrate board coordinates by selecting corners',
-        epilog='Example: python calibrate.py -i jump_image.jpg -b 1 -d 18'
+        epilog='Example: python calibrate.py -i jump_image.jpg -b 1 -d 18 -o left'
     )
     parser.add_argument('--image', '-i', required=True,
                        help='Path to the image file to calibrate (required)')
@@ -73,7 +73,8 @@ def main():
                        help='Board number to calibrate, must be 1 or greater (required)')
     parser.add_argument('--depth', '-d', type=int, default=20, 
                         help='Depth of takeoff board in cm. Defaults to 20. Required for taped takeoff boards.')
-    parser.add_argument('--orientation', '-o',choices=['left', 'right'], required=True)
+    parser.add_argument('--orientation', '-o',choices=['left', 'right'], required=True,
+                        help="Direction of athlete travel relative to the camera. Enter 'left' or 'right' (required).")
     args = parser.parse_args()
     
     # Validate board number

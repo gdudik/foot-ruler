@@ -7,8 +7,8 @@ import argparse
 import sys
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--path', '-p', required=True, help='where are the feet pics')
-parser.add_argument('--output', '-o', required=True, help="where do we put them when we're done looking at them")
+parser.add_argument('--path', '-p', required=True, help='Path to raw images. This folder will be watched for new images (required).')
+parser.add_argument('--output', '-o', required=True, help="Location to output processed images (required).")
 args = parser.parse_args()
 
 
