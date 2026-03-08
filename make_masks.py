@@ -72,9 +72,9 @@ def convert_split(split_dir: str):
 
 def main():
     # point this at your exported dataset root folder
-    dataset_root = "Jumps Shoes.v2i.yolov8"
+    dataset_root = "Jumps Shoes.v3i.yolov8"
 
-    for split in ("train", "valid"):
+    for split in ("train", "valid", "test"):
         split_dir = os.path.join(dataset_root, split)
         if os.path.isdir(split_dir):
             convert_split(split_dir)

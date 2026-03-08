@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['shoes']
+
+roboflow:
+  workspace: shoes-9osyw
+  project: jumps-shoes
+  version: 3
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/shoes-9osyw/jumps-shoes/dataset/3

@@ -37,7 +37,7 @@ class ShoeSeg(Dataset):
 
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
         if mask is None:
-            mask = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+                raise FileNotFoundError(mask_path)
 
         mask = (mask > 127).astype(np.float32)
 
@@ -85,7 +85,7 @@ def pick_device():
 
 
 def main():
-    root = "Jumps Shoes.v2i.yolov8"
+    root = "Jumps Shoes.v3i.yolov8"
     train_images = os.path.join(root, "train", "images")
     train_masks  = os.path.join(root, "train", "masks")
     val_images   = os.path.join(root, "valid", "images")
@@ -128,6 +128,11 @@ def main():
         classes=1,
         activation=None
     ).to(device)
+
+    if os.path.exists("best_pytorch.pt"):
+        ckpt = torch.load("best_pytorch.pt", map_location=device)
+        model.load_state_dict(ckpt["state_dict"])
+        print("Loaded existing best_pytorch.pt")
 
     bce = nn.BCEWithLogitsLoss()
     opt = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
