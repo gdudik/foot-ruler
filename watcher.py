@@ -41,17 +41,20 @@ class NewFileHandler(FileSystemEventHandler):
 
         print("Running:", " ".join(cmd))
 
-        try:
-            result = subprocess.run(cmd, check=True, timeout= 25)
-        except subprocess.CalledProcessError as e:
-            print(f"ERROR processing {filename}:")
-            print(f"  Return code: {e.returncode}")
-            print(f"  stdout: {e.stdout}")
-            print(f"  stderr: {e.stderr}")
-        except subprocess.TimeoutExpired as e:
-            print('timed out')
-        except Exception as e:
-            print(f"UNEXPECTED ERROR processing {filename}: {e}")
+        completed = subprocess.run(cmd, check=True, timeout=25)
+        print(f"returned {completed.returncode}", flush=True)
+
+        # try:
+        #     result = subprocess.run(cmd, check=True, timeout= 25)
+        # except subprocess.CalledProcessError as e:
+        #     print(f"ERROR processing {filename}:")
+        #     print(f"  Return code: {e.returncode}")
+        #     print(f"  stdout: {e.stdout}")
+        #     print(f"  stderr: {e.stderr}")
+        # except subprocess.TimeoutExpired as e:
+        #     print('timed out')
+        # except Exception as e:
+        #     print(f"UNEXPECTED ERROR processing {filename}: {e}")
 
 
 def main():
