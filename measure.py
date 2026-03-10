@@ -318,3 +318,6 @@ def main():
 
     base = base.convert("RGB")
     base.save(output_filename)
+
+if __name__ == "__main__":
+    main()
