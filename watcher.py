@@ -22,6 +22,8 @@ class NewFileHandler(FileSystemEventHandler):
             return
         time.sleep(1)
         file_path = Path(event.src_path)
+        if file_path.suffix.lower() not in ['.jpg', '.jpeg']:
+            return
         filename = file_path.name
 
         print(f"New file detected: {filename}")
@@ -39,7 +41,15 @@ class NewFileHandler(FileSystemEventHandler):
 
         print("Running:", " ".join(cmd))
 
-        subprocess.run(cmd)
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout= 25)
+        except subprocess.CalledProcessError as e:
+            print(f"ERROR processing {filename}:")
+            print(f"  Return code: {e.returncode}")
+            print(f"  stdout: {e.stdout}")
+            print(f"  stderr: {e.stderr}")
+        except Exception as e:
+            print(f"UNEXPECTED ERROR processing {filename}: {e}")
 
 
 def main():
