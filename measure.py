@@ -21,6 +21,7 @@ def main():
                     help='Board number to use for measurement (default: 1).')
     parser.add_argument('--path', '-p', default='.',
                         help='Path for image export. Defaults to current folder.')
+    parser.add_argument('--show_english', '-e', default='y', help="Show English Measurement?")
     args = parser.parse_args()
 
 
@@ -229,8 +230,11 @@ def main():
     quarter = round(inches * 4) / 4  # Round to nearest quarter inch
     inch_label = f"{quarter:.2f}\""  # Format as decimal with 2 places
 
-    # Combined label with newline
-    label = f"{cm_label} / {inch_label}"
+    # Combined label
+    if args.show_english == 'y':
+        label = f"{cm_label} / {inch_label}"
+    else:
+        label = f"{cm_label}"
 
     # Generate output filename by adding "_annotated" before the extension
     base_name, extension = os.path.splitext(os.path.basename(IMAGE_PATH))

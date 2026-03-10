@@ -3,7 +3,7 @@ import numpy as np
 import json
 import os
 import sys
-import argparse
+
 
 # File to save coordinates
 COORDS_FILE = 'board_coords.json'
@@ -62,30 +62,18 @@ def on_mouse(event, x, y, flags, params):
     cv2.imshow("Calibrate - Select 4 Board Corners", display_img)
 
 def main():
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(
-        description='Calibrate board coordinates by selecting corners',
-        epilog='Example: python calibrate.py -i jump_image.jpg -b 1 -d 18 -o left'
-    )
-    parser.add_argument('--image', '-i', required=True,
-                       help='Path to the image file to calibrate (required)')
-    parser.add_argument('--board', '-b', type=int, required=True,
-                       help='Board number to calibrate, must be 1 or greater (required)')
-    parser.add_argument('--depth', '-d', type=int, default=20, 
-                        help='Depth of takeoff board in cm. Defaults to 20. Required for taped takeoff boards.')
-    parser.add_argument('--orientation', '-o',choices=['left', 'right'], required=True,
-                        help="Direction of athlete travel relative to the camera. Enter 'left' or 'right' (required).")
-    args = parser.parse_args()
     
-    # Validate board number
-    if args.board < 1:
+
+    image_path = input("Path to the image file to calibrate (required): ")
+    board_number = int(input("Board number to calibrate (required): "))
+    depth = int(input("Depth of takeoff board in cm. (20): ") or 20)
+    orientation = input("Direction of athlete travel relative to the camera. Enter 'left' or 'right' (required): ")
+
+    if board_number <= 0:
         print("Error: Board number must be 1 or greater.")
-        return 1
+        return 1    
     
-    image_path = args.image
-    board_number = args.board
-    depth = args.depth
-    orientation = args.orientation
+    
     
     print(f"Calibrating board {board_number}...")
     

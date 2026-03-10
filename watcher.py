@@ -6,13 +6,16 @@ from watchdog.events import FileSystemEventHandler
 import argparse
 import sys
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--path', '-p', required=True, help='Path to raw images. This folder will be watched for new images (required).')
-parser.add_argument('--output', '-o', required=True, help="Location to output processed images (required).")
-args = parser.parse_args()
 
 
-WATCH_FOLDER = args.path
+WATCH_FOLDER= input("Path to raw images. This folder will be watched for new images (required): ")
+OUTPUT = input("Location to output processed images (required): ")
+SHOW_ENGLISH = input("Show English measurement (y/n)? ")
+
+if SHOW_ENGLISH not in ['y','n']:
+    print("Please indicate y or n whether you want to print an English measurement on images.")
+    quit()
+
 
 class NewFileHandler(FileSystemEventHandler):
 
@@ -36,7 +39,8 @@ class NewFileHandler(FileSystemEventHandler):
             "measure.py",
             "--image", str(file_path),
             "--board", board_num,
-            "--path", args.output
+            "--path", OUTPUT,
+            "--show_english", SHOW_ENGLISH
         ]
 
         print("Running:", " ".join(cmd))
